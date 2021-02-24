@@ -26,8 +26,11 @@ fn supported_protocols(
     ctx: &mut SslContextBuilder,
 ) -> Result<(), ErrorStack> {
     use self::openssl::ssl::SslVersion;
-
+    eprintln!("29 rntls");
+    eprintln!("min supported {:?}", min);
+    eprintln!("max supported {:?}", max);
     fn cvt(p: Protocol) -> SslVersion {
+        eprintln!("protocol: {:#?}", p);
         match p {
             Protocol::Sslv3 => SslVersion::SSL3,
             Protocol::Tlsv10 => SslVersion::TLS1,
@@ -36,10 +39,22 @@ fn supported_protocols(
             Protocol::__NonExhaustive => unreachable!(),
         }
     }
-
-    ctx.set_min_proto_version(min.map(cvt))?;
-    ctx.set_max_proto_version(max.map(cvt))?;
-
+    eprintln!("39 rntls");
+    match ctx.set_min_proto_version(min.map(cvt)) {
+        Ok(_) => {},
+        Err(e) => {
+            eprintln!("min version error {:#?}", e);
+            panic!(e);
+        }
+    };
+    match ctx.set_max_proto_version(max.map(cvt)) {
+        Ok(_) => {},
+        Err(e) => {
+            eprintln!("max version error {:#?}", e);
+            panic!(e);
+        }
+    };
+    eprintln!("42 rntls");
     Ok(())
 }
 
@@ -254,19 +269,26 @@ impl TlsConnector {
     pub fn new(builder: &TlsConnectorBuilder) -> Result<TlsConnector, Error> {
         init_trust();
 
+        eprintln!("257 rntls");
         let mut connector = SslConnector::builder(SslMethod::tls())?;
         if let Some(ref identity) = builder.identity {
+            eprintln!("260 rntls");
             connector.set_certificate(&identity.0.cert)?;
+            eprintln!("262 rntls");
             connector.set_private_key(&identity.0.pkey)?;
             for cert in identity.0.chain.iter().rev() {
                 connector.add_extra_chain_cert(cert.to_owned())?;
             }
+            eprintln!("267 rntls");
         }
+        eprintln!("268 rntls");
         supported_protocols(builder.min_protocol, builder.max_protocol, &mut connector)?;
 
+        eprintln!("272 rntls");
         if builder.disable_built_in_roots {
             connector.set_cert_store(X509StoreBuilder::new()?.build());
         }
+        eprintln!("276 rntls");
 
         for cert in &builder.root_certificates {
             if let Err(err) = connector.cert_store_mut().add_cert((cert.0).0.clone()) {

@@ -430,7 +430,13 @@ impl TlsConnectorBuilder {
 
     /// Creates a new `TlsConnector`.
     pub fn build(&self) -> Result<TlsConnector> {
-        let connector = imp::TlsConnector::new(self)?;
+        let connector = match imp::TlsConnector::new(self) {
+            Ok(c) => c,
+            Err(e) => {
+                eprintln!("{:#?}", e);
+                panic!(e);
+            }
+        };
         Ok(TlsConnector(connector))
     }
 }

@@ -13,7 +13,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
 vendored = ["openssl/vendored"]
-alpn = ["security-framework/alpn"] 
+alpn = ["security-framework/alpn"]
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 security-framework = "2.0.0"
@@ -27,8 +27,8 @@ schannel = "0.1.16"
 
 [target.'cfg(not(any(target_os = "windows", target_os = "macos", target_os = "ios")))'.dependencies]
 log = "0.4.5"
-openssl = "0.10.29"
-openssl-sys = "0.9.55"
+openssl = "0.10.32" 
+openssl-sys = "0.9.60"
 openssl-probe = "0.1"
 
 [dev-dependencies]
